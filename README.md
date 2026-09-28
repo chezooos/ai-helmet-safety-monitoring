@@ -1,28 +1,32 @@
 # AI 헬멧 안전 모니터링
 
-## 웹앱
+## 웹앱 접속 (중간 화면 없음)
 
-배포 URL은 Cloud Run 배포 후 README에 갱신됩니다.
+**공개 주소:** https://necessarily-close-consumers-genealogy.trycloudflare.com
 
 로컬: http://127.0.0.1:5000
+
+GitHub: https://github.com/chezooos/ai-helmet-safety-monitoring
+
+> PC가 켜져 있고 Flask + 터널이 실행 중이어야 합니다.  
+> Windows 시작 시 서버/터널 자동 실행을 걸어 두었습니다.
+
+## GCP Cloud Run
+
+현재 GCP 프로젝트에 **결제(Billing)가 꺼져 있어** Cloud Run API를 켤 수 없습니다.
+
+1. https://console.cloud.google.com/billing 에서 결제 계정 연결  
+2. 아래 실행:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\Users\COM\Desktop\lg\scripts\deploy_gcp.ps1
+```
+
+클라우드에는 카메라/아두이노가 없어서, 실제 감지·서보는 **이 PC + 공개 터널** 방식이 맞습니다.
+
+## 로컬 실행
 
 ```powershell
 cd C:\Users\COM\Desktop\lg
 py app.py
 ```
-
-## GCP Cloud Run 배포
-
-```bash
-gcloud run deploy ai-helmet-safety \
-  --source . \
-  --region asia-northeast3 \
-  --allow-unauthenticated \
-  --memory 2Gi \
-  --cpu 2 \
-  --timeout 300 \
-  --set-env-vars ARDUINO_ENABLED=0
-```
-
-카메라/아두이노는 클라우드에 없어서 감지·서보는 로컬 PC에서 쓰는 기능입니다.
-클라우드에서는 UI·공기질 시뮬레이션·API가 상시 제공됩니다.
