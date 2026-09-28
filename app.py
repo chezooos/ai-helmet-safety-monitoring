@@ -62,8 +62,9 @@ camera_lock = threading.Lock()
 stats_lock = threading.Lock()
 servo_lock = threading.Lock()
 
-# 아두이노 서보 (기본 COM5, 환경변수 ARDUINO_PORT 로 변경 가능)
+# 아두이노 서보 (기본 COM5, 클라우드에서는 ARDUINO_ENABLED=0)
 ARDUINO_PORT = os.environ.get("ARDUINO_PORT", "COM5")
+ARDUINO_ENABLED = os.environ.get("ARDUINO_ENABLED", "1").strip() not in {"0", "false", "False", ""}
 ARDUINO_BAUD = int(os.environ.get("ARDUINO_BAUD", "115200"))
 servo_serial = None
 servo_angle = 90
@@ -141,8 +142,12 @@ def start_air_quality_simulation():
 
 
 def open_servo_serial():
-    """아두이노 시리얼 연결 (COM5 기본)."""
+    """아두이노 시리얼 연결 (COM5 기본). 클라우드에서는 비활성."""
     global servo_serial
+    if not ARDUINO_ENABLED or not ARDUINO_PORT:
+        with stats_lock:
+            latest_stats["servo_connected"] = False
+        return False
     if serial is None:
         print("pyserial 미설치: pip install pyserial")
         return False
@@ -1068,14 +1073,24 @@ def video_feed():
     )
 
 
-if __name__ == "__main__":
+def bootstrap():
+    """gunicorn / python 공통 초기화."""
     load_model()
     start_air_quality_simulation()
-    open_servo_serial()
-    print("서버 시작: http://127.0.0.1:5000")
-    print(f"아두이노 포트 설정: {ARDUINO_PORT} (환경변수 ARDUINO_PORT 로 변경)")
+    if ARDUINO_ENABLED:
+        open_servo_serial()
+
+
+# Cloud Run(gunicorn)에서도 모델·공기질 시뮬레이션 기동
+bootstrap()
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "5000"))
+    print(f"서버 시작: http://127.0.0.1:{port}")
+    print(f"아두이노: enabled={ARDUINO_ENABLED} port={ARDUINO_PORT}")
     try:
-        app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)
+        app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
     finally:
         _air_sim_stop.set()
         close_servo_serial()

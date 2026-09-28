@@ -1,0 +1,14 @@
+.git
+.gitignore
+dataset/
+labels_backup/
+runs/
+logs/
+__pycache__/
+*.pyc
+.venv/
+venv/
+docs/
+scripts/
+yolo11n.pt
+README.md

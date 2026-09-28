@@ -1,35 +1,28 @@
 # AI 헬멧 안전 모니터링
 
-## 웹앱 바로 열기
+## 웹앱
 
-**[웹앱 접속 (이 PC)](http://127.0.0.1:5000)**
+배포 URL은 Cloud Run 배포 후 README에 갱신됩니다.
 
-또는 GitHub Pages: https://chezooos.github.io/ai-helmet-safety-monitoring/
-
-> 카메라·아두이노·YOLO 서버는 **이 컴퓨터**에서 실행됩니다.  
-> Windows 로그인 시 서버가 자동으로 켜지도록 설정되어 있습니다.
-
-## 기능
-
-- YOLO 헬멧/조끼 실시간 감지
-- Flask + 웹 대시보드
-- 아두이노 서보 수동 회전
-- 공기질(시뮬레이션) 표시
-
-## 실행 (수동)
+로컬: http://127.0.0.1:5000
 
 ```powershell
 cd C:\Users\COM\Desktop\lg
 py app.py
 ```
 
-브라우저: http://127.0.0.1:5000
+## GCP Cloud Run 배포
 
-## 자동 시작
-
-`scripts\install_autostart.ps1` 을 관리자 권한으로 한 번 실행하면  
-Windows 로그인 시 서버가 자동 기동합니다.
-
-```powershell
-powershell -ExecutionPolicy Bypass -File C:\Users\COM\Desktop\lg\scripts\install_autostart.ps1
+```bash
+gcloud run deploy ai-helmet-safety \
+  --source . \
+  --region asia-northeast3 \
+  --allow-unauthenticated \
+  --memory 2Gi \
+  --cpu 2 \
+  --timeout 300 \
+  --set-env-vars ARDUINO_ENABLED=0
 ```
+
+카메라/아두이노는 클라우드에 없어서 감지·서보는 로컬 PC에서 쓰는 기능입니다.
+클라우드에서는 UI·공기질 시뮬레이션·API가 상시 제공됩니다.
