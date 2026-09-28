@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 헬멧 안전 모니터링</title>
+  <meta http-equiv="refresh" content="2;url=http://127.0.0.1:5000" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b, var(--bg));
+      color: var(--text);
+      padding: 24px;
+    }
+    .card {
+      width: min(440px, 100%);
+      background: var(--card);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    h1 { margin: 0 0 10px; font-size: 1.35rem; }
+    p { margin: 0 0 18px; color: var(--muted); line-height: 1.5; font-size: 0.95rem; }
+    a.btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #0f172a;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 10px;
+    }
+    .note { margin-top: 16px; font-size: 0.8rem; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>AI 헬멧 안전 모니터링</h1>
+    <p>2초 후 웹앱으로 이동합니다.<br/>안 되면 아래 버튼을 누르세요.</p>
+    <a class="btn" href="http://127.0.0.1:5000">웹앱 열기</a>
+    <p class="note">서버 PC에서 자동 실행 중이어야 합니다.<br/>저장소: github.com/chezooos/ai-helmet-safety-monitoring</p>
+  </div>
+</body>
+</html>
