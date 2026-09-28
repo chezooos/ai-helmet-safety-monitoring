@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI 헬멧 안전 모니터링</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #dce7f4;
+            color: #1f2937;
+        }
+
+        /* 로그인 */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #dce7f4;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: #ffffff;
+            border: 1px solid #c9d7ea;
+            border-radius: 18px;
+            padding: 36px 32px;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.10);
+        }
+
+        .login-title {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 22px;
+        }
+
+        .role-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: #f3f4f6;
+            padding: 6px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .role-tab {
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            padding: 12px 10px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .role-tab.active {
+            background: white;
+            color: #1f2937;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            color: #4b5563;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .field input {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            background: #f7f8fa;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .field input:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .login-error {
+            display: none;
+            margin-bottom: 14px;
+            background: #fef2f2;
+            color: #b91c1c;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .login-btn {
+            width: 100%;
+            border: none;
+            background: #2563eb;
+            color: white;
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .login-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 상단 */
+        header {
+            background: linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+            padding: 18px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #c9d7ea;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.03em;
+            background: linear-gradient(90deg, #1e40af 0%, #2563eb 45%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: #1d4ed8;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo::before {
+            content: "";
+            width: 9px;
+            height: 22px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #93c5fd 0%, #2563eb 55%, #1d4ed8 100%);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+            flex-shrink: 0;
+            -webkit-text-fill-color: initial;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 14px;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f3f4f6;
+            border-radius: 999px;
+            padding: 6px 12px;
+        }
+
+        .role-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-radius: 999px;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .role-badge.worker {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .logout-btn {
+            background: #e5e7eb;
+            color: #1f2937;
+            padding: 8px 12px;
+        }
+
+        /* 전체 */
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 25px;
+        }
+
+        /* 상태 카드 */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .status-title {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .green {
+            color: #16a34a;
+        }
+
+        .red {
+            color: #dc2626;
+        }
+
+        .blue {
+            color: #2563eb;
+        }
+
+        .orange {
+            color: #d97706;
+        }
+
+        /* 메인 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* 카메라 */
+        .camera {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #111827;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera img,
+        .camera video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            background: #111827;
+        }
+
+        .camera-feed.active {
+            display: block;
+        }
+
+        .camera-placeholder {
+            color: #9ca3af;
+            text-align: center;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .camera-placeholder.hidden {
+            display: none;
+        }
+
+        .camera-placeholder p {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .live {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #ef4444;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        /* 제어 */
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 11px 16px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .start-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .start-btn:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .stop-btn {
+            background: #e5e7eb;
+            color: #1f2937;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stop-btn:hover {
+            background: #d1d5db;
+        }
+
+        .start-btn.inactive {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .start-btn.inactive:hover {
+            background: #d1d5db;
+        }
+
+        .stop-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .stop-btn.active:hover {
+            background: #1d4ed8;
+        }
+
+        .stop-btn.active:active {
+            background: #1e40af;
+        }
+
+        .control-hint {
+            display: none;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #b91c1c;
+        }
+
+        .control-hint.show {
+            display: block;
+        }
+
+        /* 오른쪽 상태 */
+        .info-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-item:last-child {
+            border: none;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* 서보 */
+        .servo-box {
+            margin-top: 18px;
+        }
+
+        .servo-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .servo-angle {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .servo-bar {
+            width: 100%;
+            height: 16px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .servo-progress {
+            width: 50%;
+            height: 100%;
+            background: #2563eb;
+            pointer-events: none;
+        }
+
+        .air-alert {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .air-alert.show {
+            display: flex;
+        }
+
+        .air-progress {
+            width: 42%;
+            height: 100%;
+            background: #16a34a;
+            transition: 0.3s;
+        }
+
+        .air-progress.warn {
+            background: #d97706;
+        }
+
+        .air-progress.danger {
+            background: #dc2626;
+        }
+
+        /* 로그 */
+        .logs {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        th {
+            color: #6b7280;
+        }
+
+        .badge-safe {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .badge-warn {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .worker-page {
+            min-height: 100vh;
+            background: #dce7f4;
+        }
+
+        .worker-wrap {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 25px;
+        }
+
+        .survey-card,
+        .work-card {
+            background: #ffffff;
+            border: 1px solid #c9d7ea;
+            border-radius: 18px;
+            padding: 32px 28px;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.10);
+        }
+
+        .survey-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .survey-desc {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .survey-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .survey-item:first-child {
+            padding-top: 0;
+        }
+
+        .survey-q {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            line-height: 1.45;
+        }
+
+        .survey-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .survey-choice {
+            border: 1px solid #e5e7eb;
+            background: #f7f8fa;
+            color: #4b5563;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .survey-choice.selected {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        .work-time {
+            font-size: 48px;
+            font-weight: bold;
+            color: #1d4ed8;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+
+        .work-state {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 24px;
+        }
+
+        .work-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .work-actions button {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .pause-btn {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .end-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .end-btn:disabled {
+            background: #fca5a5;
+            cursor: not-allowed;
+        }
+
+        .resume-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* 태블릿 */
+        @media (max-width: 1200px) {
+            .status-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            header {
+                padding: 16px 20px;
+                flex-wrap: wrap;
+            }
+
+            .logo {
+                font-size: 19px;
+            }
+
+            .logo::before {
+                height: 19px;
+                width: 8px;
+            }
+
+            .header-right {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 모바일 */
+        @media (max-width: 640px) {
+            .login-page {
+                align-items: flex-start;
+                padding: 16px;
+                padding-top: 40px;
+            }
+
+            .login-card {
+                max-width: 100%;
+                padding: 28px 20px;
+                border-radius: 14px;
+            }
+
+            .login-title {
+                font-size: 22px;
+                margin-bottom: 18px;
+            }
+
+            .role-tab {
+                padding: 11px 8px;
+            }
+
+            .field input {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 550px) {
+            header {
+                padding: 14px 15px;
+            }
+
+            .logo {
+                font-size: 17px;
+            }
+
+            .logo::before {
+                height: 17px;
+                width: 7px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .user-chip {
+                max-width: 100%;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .worker-wrap {
+                padding: 15px;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .status-card {
+                padding: 15px;
+            }
+
+            .status-value {
+                font-size: 19px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+
+            .control-row {
+                flex-wrap: wrap;
+            }
+
+            .control-row button {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .camera-placeholder h2 {
+                font-size: 18px;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            .table-wrap {
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .login-page {
+                padding: 12px;
+                padding-top: 24px;
+            }
+
+            .login-card,
+            .survey-card,
+            .work-card {
+                padding: 22px 16px;
+                border-radius: 12px;
+            }
+
+            .work-time {
+                font-size: 36px;
+            }
+
+            .work-actions {
+                flex-direction: column;
+            }
+
+            .login-title {
+                font-size: 20px;
+            }
+
+            .role-tabs {
+                gap: 6px;
+                padding: 5px;
+            }
+
+            .role-tab {
+                font-size: 13px;
+                padding: 10px 6px;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .logo {
+                font-size: 16px;
+            }
+
+            .logo::before {
+                height: 16px;
+                width: 6px;
+            }
+        }
+
+        @media (max-height: 640px) and (orientation: landscape) {
+            .login-page {
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .login-card {
+                padding: 20px 24px;
+            }
+
+            .login-title {
+                font-size: 20px;
+                margin-bottom: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="loginPage" class="login-page">
+    <div class="login-card">
+        <h1 class="login-title">로그인</h1>
+
+        <div class="role-tabs">
+            <button type="button" class="role-tab active" id="tabAdmin" onclick="selectRole('admin')">관리자</button>
+            <button type="button" class="role-tab" id="tabWorker" onclick="selectRole('worker')">작업자</button>
+        </div>
+
+        <form id="adminForm" class="login-form active" onsubmit="loginAdmin(event)">
+            <div class="field">
+                <label for="adminId">아이디</label>
+                <input id="adminId" type="text" autocomplete="username" placeholder="아이디">
+            </div>
+            <div class="field">
+                <label for="adminPw">비밀번호</label>
+                <input id="adminPw" type="password" autocomplete="current-password" placeholder="비밀번호">
+            </div>
+            <div class="field">
+                <label for="adminCode">관리자 코드</label>
+                <input id="adminCode" type="password" inputmode="numeric" placeholder="관리자 코드">
+            </div>
+            <div id="adminError" class="login-error" role="alert"></div>
+            <button type="submit" class="login-btn">관리자 로그인</button>
+        </form>
+
+        <form id="workerForm" class="login-form" onsubmit="loginWorker(event)">
+            <div class="field">
+                <label for="workerId">아이디</label>
+                <input id="workerId" type="text" autocomplete="username" placeholder="아이디">
+            </div>
+            <div class="field">
+                <label for="workerPw">비밀번호</label>
+                <input id="workerPw" type="password" autocomplete="current-password" placeholder="비밀번호">
+            </div>
+            <div id="workerError" class="login-error" role="alert"></div>
+            <button type="submit" class="login-btn">작업자 로그인</button>
+        </form>
+    </div>
+</div>
+
+<div id="surveyPage" class="worker-page hidden">
+    <header>
+        <div class="logo">작업 전 안전 설문</div>
+        <div class="header-right">
+            <div class="user-chip">
+                <span class="role-badge worker">작업자</span>
+                <span id="surveyUserName">worker01</span>
+            </div>
+            <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
+        </div>
+    </header>
+
+    <div class="worker-wrap">
+        <div class="survey-card">
+            <h1 class="survey-title">작업 전 확인</h1>
+            <p class="survey-desc">모든 문항에 답한 뒤 통과하면 작업을 시작할 수 있습니다.</p>
+
+            <div class="survey-item" data-safe="yes">
+                <div class="survey-q">오늘 몸 상태는 작업하기에 괜찮습니까?</div>
+                <div class="survey-options">
+                    <button type="button" class="survey-choice" data-answer="yes" onclick="selectSurveyAnswer(this)">예</button>
+                    <button type="button" class="survey-choice no" data-answer="no" onclick="selectSurveyAnswer(this)">아니오</button>
+                </div>
+            </div>
+
+            <div class="survey-item" data-safe="no">
+                <div class="survey-q">어지럼증, 두통, 호흡곤란 등의 증상이 있습니까?</div>
+                <div class="survey-options">
+                    <button type="button" class="survey-choice" data-answer="yes" onclick="selectSurveyAnswer(this)">예</button>
+                    <button type="button" class="survey-choice no" data-answer="no" onclick="selectSurveyAnswer(this)">아니오</button>
+                </div>
+            </div>
+
+            <div class="survey-item" data-safe="yes">
+                <div class="survey-q">헬멧, 안전조끼 등 필수 보호장비를 모두 착용했습니까?</div>
+                <div class="survey-options">
+                    <button type="button" class="survey-choice" data-answer="yes" onclick="selectSurveyAnswer(this)">예</button>
+                    <button type="button" class="survey-choice no" data-answer="no" onclick="selectSurveyAnswer(this)">아니오</button>
+                </div>
+            </div>
+
+            <div class="survey-item" data-safe="yes">
+                <div class="survey-q">작업 전 주변의 위험요소를 확인했습니까?</div>
+                <div class="survey-options">
+                    <button type="button" class="survey-choice" data-answer="yes" onclick="selectSurveyAnswer(this)">예</button>
+                    <button type="button" class="survey-choice no" data-answer="no" onclick="selectSurveyAnswer(this)">아니오</button>
+                </div>
+            </div>
+
+            <div class="survey-item" data-safe="yes">
+                <div class="survey-q">오늘 작업 내용과 안전수칙을 충분히 숙지했습니까?</div>
+                <div class="survey-options">
+                    <button type="button" class="survey-choice" data-answer="yes" onclick="selectSurveyAnswer(this)">예</button>
+                    <button type="button" class="survey-choice no" data-answer="no" onclick="selectSurveyAnswer(this)">아니오</button>
+                </div>
+            </div>
+
+            <div id="surveyError" class="login-error" role="alert"></div>
+            <button type="button" class="login-btn" onclick="submitSurvey()">작업 시작</button>
+        </div>
+    </div>
+</div>
+
+<div id="workerWorkPage" class="worker-page hidden">
+    <header>
+        <div class="logo">작업 현황</div>
+        <div class="header-right">
+            <div class="user-chip">
+                <span class="role-badge worker">작업자</span>
+                <span id="workUserName">worker01</span>
+            </div>
+            <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
+        </div>
+    </header>
+
+    <div class="worker-wrap">
+        <div class="work-card">
+            <div class="work-time" id="workTime">00:00:00</div>
+            <div class="work-state green" id="workState">작업 중</div>
+            <div class="work-actions">
+                <button type="button" class="pause-btn" id="pauseWorkBtn" onclick="toggleWorkPause()">작업 중지</button>
+                <button type="button" class="end-btn" id="endWorkBtn" onclick="endWork()">작업 종료</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dashboardPage" class="hidden">
+
+<header>
+
+    <div class="logo">
+        AI 헬멧 안전 모니터링
+    </div>
+
+    <div class="header-right">
+        <div class="user-chip">
+            <span class="role-badge" id="userRoleBadge">관리자</span>
+            <span id="userNameLabel">admin</span>
+        </div>
+        <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <!-- 상태 카드 -->
+    <div class="status-grid">
+
+        <div class="status-card">
+            <div class="status-title">카메라 상태</div>
+            <div class="status-value green" id="aiStatus">
+                정상 작동
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title">감지된 횟수</div>
+            <div class="status-value" id="detectCount">
+                0회
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title">현재 헬멧 미착용</div>
+            <div class="status-value" id="noHelmetCount">
+                0명
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title">현재 시간</div>
+            <div class="status-value" id="currentTime">
+                --:--:--
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title">공기질</div>
+            <div class="status-value green" id="airStatus">
+                양호
+            </div>
+        </div>
+
+    </div>
+
+    <div id="airAlert" class="air-alert">
+        <span id="airAlertText">공기질 농도가 기준을 초과했습니다. 작업을 진행할 수 없습니다.</span>
+    </div>
+
+
+    <div class="main-grid">
+
+        <!-- 실시간 영상 -->
+        <div class="panel">
+
+            <div class="panel-title">
+                실시간 AI 감지
+            </div>
+
+            <div class="camera">
+
+                <div class="live hidden" id="liveBadge">
+                    LIVE
+                </div>
+
+                <img
+                    id="cameraFeed"
+                    class="camera-feed"
+                    alt="실시간 AI 감지 영상"
+                >
+
+                <div class="camera-placeholder" id="cameraPlaceholder">
+                    <h2>대기중</h2>
+                    <p>감지 시작을 누르면 카메라가 연결됩니다.</p>
+                </div>
+
+            </div>
+
+            <div class="control-row">
+
+                <button class="start-btn" id="startBtn" onclick="startDetection()">
+                    감지 시작
+                </button>
+
+                <button type="button" class="stop-btn" id="stopBtn" onclick="stopDetection()">
+                    감지 중지
+                </button>
+
+            </div>
+            <p id="airBlockHint" class="control-hint">공기질 기준을 초과해 감지를 시작할 수 없습니다.</p>
+
+        </div>
+
+
+        <!-- 오른쪽 정보 -->
+        <div class="panel">
+
+            <div class="panel-title">
+                실시간 상태
+            </div>
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    감지 상태
+                </div>
+
+                <div class="info-value green" id="detectStatus">
+                    안전
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    공기질 상태
+                </div>
+
+                <div class="info-value green" id="airInfoStatus">
+                    양호
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    현재 공기질 농도
+                </div>
+
+                <div class="info-value">
+                    <span id="airPpm">350</span> ppm
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    작업 기준
+                </div>
+
+                <div class="info-value">
+                    <span id="airLimit">1000</span> ppm
+                </div>
+
+            </div>
+
+
+            <div id="servoBox" class="servo-box hidden">
+
+                <div class="servo-head">
+                    <div class="info-label">카메라 회전</div>
+                    <div class="servo-angle" id="servoAngleLabel">90°</div>
+                </div>
+
+                <div class="servo-bar" id="servoBar">
+
+                    <div
+                        class="servo-progress"
+                        id="servoProgress">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 감지 기록 -->
+    <div class="panel logs">
+
+        <div class="panel-title">
+            최근 감지 기록
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                <tr>
+                    <th>시간</th>
+                    <th>감지 대상</th>
+                    <th>헬멧 상태</th>
+                    <th>공기질</th>
+                    <th>신뢰도</th>
+                </tr>
+
+                </thead>
+
+                <tbody id="logTable">
+
+                <tr>
+                    <td>-</td>
+                    <td>감지 기록 없음</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+let detecting = false;
+let airPpm = 350;
+let airBlocked = false;
+let servoAngle = 90;
+let servoDragging = false;
+let servoSendTimer = null;
+let appSession = null;
+let workTimer = null;
+let statusPollTimer = null;
+let startInFlight = false;
+
+const ADMIN_ID_PATTERN = /^manager\d{2}$/;
+const WORKER_ID_PATTERN = /^worker\d{2}$/;
+const ADMIN_CODE = "1234";
+const MIN_PASSWORD_LENGTH = 8;
+const SESSION_KEY = "helmetAuth";
+const ASSIGNED_ID_MESSAGE = "지정받은 아이디로 입력하세요.";
+const AIR_QUALITY_LIMIT = 1000;
+const AIR_QUALITY_WARN = 800;
+const FLASK_ORIGIN = "http://127.0.0.1:5000";
+const API_BASE = (window.location.port === "5000") ? "" : FLASK_ORIGIN;
+
+
+function selectRole(role) {
+    const isAdmin = role === "admin";
+
+    document.getElementById("tabAdmin").classList.toggle("active", isAdmin);
+    document.getElementById("tabWorker").classList.toggle("active", !isAdmin);
+    document.getElementById("adminForm").classList.toggle("active", isAdmin);
+    document.getElementById("workerForm").classList.toggle("active", !isAdmin);
+
+    hideError("adminError");
+    hideError("workerError");
+}
+
+
+function showError(id, message) {
+    const el = document.getElementById(id);
+    el.innerText = message;
+    el.classList.add("show");
+}
+
+
+function hideError(id) {
+    const el = document.getElementById(id);
+    el.innerText = "";
+    el.classList.remove("show");
+}
+
+
+function loginAdmin(event) {
+    event.preventDefault();
+    hideError("adminError");
+
+    const id = document.getElementById("adminId").value.trim();
+    const pw = document.getElementById("adminPw").value;
+    const code = document.getElementById("adminCode").value.trim();
+
+    if (!id || !pw || !code) {
+        showError("adminError", "아이디, 비밀번호, 관리자 코드를 모두 입력하세요.");
+        return;
+    }
+
+    if (!ADMIN_ID_PATTERN.test(id)) {
+        showError("adminError", ASSIGNED_ID_MESSAGE);
+        return;
+    }
+
+    if (pw.length < MIN_PASSWORD_LENGTH) {
+        showError("adminError", "비밀번호를 다시 확인하세요.");
+        return;
+    }
+
+    if (code !== ADMIN_CODE) {
+        showError("adminError", "관리자 코드가 올바르지 않습니다.");
+        return;
+    }
+
+    enterApp("admin", id);
+}
+
+
+function loginWorker(event) {
+    event.preventDefault();
+    hideError("workerError");
+
+    const id = document.getElementById("workerId").value.trim();
+    const pw = document.getElementById("workerPw").value;
+
+    if (!id || !pw) {
+        showError("workerError", "아이디와 비밀번호를 모두 입력하세요.");
+        return;
+    }
+
+    if (!WORKER_ID_PATTERN.test(id)) {
+        showError("workerError", ASSIGNED_ID_MESSAGE);
+        return;
+    }
+
+    if (pw.length < MIN_PASSWORD_LENGTH) {
+        showError("workerError", "비밀번호를 다시 확인하세요.");
+        return;
+    }
+
+    enterApp("worker", id);
+}
+
+
+function saveSession() {
+    if (!appSession) return;
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(appSession));
+}
+
+
+function hideAllPages() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("surveyPage").classList.add("hidden");
+    document.getElementById("workerWorkPage").classList.add("hidden");
+    document.getElementById("dashboardPage").classList.add("hidden");
+}
+
+
+function enterApp(role, name) {
+    appSession = {
+        role,
+        name,
+        surveyDone: false,
+        workElapsedMs: 0,
+        workStartedAt: null,
+        workPaused: false,
+        workEnded: false
+    };
+    saveSession();
+    renderSession(appSession);
+}
+
+
+function resetSurvey() {
+    document.querySelectorAll(".survey-choice").forEach(function (btn) {
+        btn.classList.remove("selected");
+    });
+    hideError("surveyError");
+}
+
+
+function logout() {
+    stopWorkTicker();
+    if (detecting) {
+        stopDetection();
+    }
+    appSession = null;
+    sessionStorage.removeItem(SESSION_KEY);
+    hideAllPages();
+    resetSurvey();
+    document.getElementById("loginPage").classList.remove("hidden");
+    document.getElementById("adminForm").reset();
+    document.getElementById("workerForm").reset();
+    hideError("adminError");
+    hideError("workerError");
+    selectRole("admin");
+}
+
+
+function renderSession(session) {
+    appSession = session;
+    hideAllPages();
+
+    if (session.role === "admin") {
+        const badge = document.getElementById("userRoleBadge");
+        badge.innerText = "관리자";
+        badge.classList.remove("worker");
+        document.getElementById("userNameLabel").innerText = session.name;
+        document.getElementById("dashboardPage").classList.remove("hidden");
+        document.getElementById("servoBox").classList.remove("hidden");
+        return;
+    }
+
+    document.getElementById("surveyUserName").innerText = session.name;
+    document.getElementById("workUserName").innerText = session.name;
+
+    if (!session.surveyDone) {
+        document.getElementById("surveyPage").classList.remove("hidden");
+        return;
+    }
+
+    document.getElementById("workerWorkPage").classList.remove("hidden");
+    renderWorkState();
+    if (!session.workEnded && !session.workPaused) {
+        startWorkTicker();
+    } else {
+        updateWorkTimeDisplay();
+    }
+}
+
+
+function restoreSession() {
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (!saved) return;
+
+    try {
+        const session = JSON.parse(saved);
+        if (session && session.role && session.name) {
+            renderSession(session);
+        }
+    } catch (error) {
+        sessionStorage.removeItem(SESSION_KEY);
+    }
+}
+
+
+function selectSurveyAnswer(button) {
+    const options = button.parentElement.querySelectorAll(".survey-choice");
+    options.forEach(function (btn) {
+        btn.classList.remove("selected");
+    });
+    button.classList.add("selected");
+    hideError("surveyError");
+}
+
+
+function submitSurvey() {
+    const items = document.querySelectorAll(".survey-item");
+    let unanswered = false;
+    let unsafe = false;
+
+    items.forEach(function (item) {
+        const selected = item.querySelector(".survey-choice.selected");
+        if (!selected) {
+            unanswered = true;
+            return;
+        }
+        if (selected.getAttribute("data-answer") !== item.getAttribute("data-safe")) {
+            unsafe = true;
+        }
+    });
+
+    if (unanswered) {
+        showError("surveyError", "모든 문항에 답해주세요.");
+        return;
+    }
+
+    if (unsafe) {
+        showError("surveyError", "설문을 통과하지 못해 작업을 시작할 수 없습니다.");
+        return;
+    }
+
+    if (!appSession) return;
+
+    appSession.surveyDone = true;
+    appSession.workElapsedMs = 0;
+    appSession.workStartedAt = Date.now();
+    appSession.workPaused = false;
+    appSession.workEnded = false;
+    saveSession();
+    renderSession(appSession);
+}
+
+
+function formatDuration(ms) {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const hours = String(Math.floor(total / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+    const seconds = String(total % 60).padStart(2, "0");
+    return hours + ":" + minutes + ":" + seconds;
+}
+
+
+function getWorkElapsed() {
+    if (!appSession) return 0;
+    if (appSession.workEnded || appSession.workPaused || !appSession.workStartedAt) {
+        return appSession.workElapsedMs || 0;
+    }
+    return (appSession.workElapsedMs || 0) + (Date.now() - appSession.workStartedAt);
+}
+
+
+function updateWorkTimeDisplay() {
+    const timeEl = document.getElementById("workTime");
+    if (timeEl) {
+        timeEl.innerText = formatDuration(getWorkElapsed());
+    }
+}
+
+
+function startWorkTicker() {
+    stopWorkTicker();
+    updateWorkTimeDisplay();
+    workTimer = setInterval(updateWorkTimeDisplay, 1000);
+}
+
+
+function stopWorkTicker() {
+    if (workTimer) {
+        clearInterval(workTimer);
+        workTimer = null;
+    }
+}
+
+
+function renderWorkState() {
+    const stateEl = document.getElementById("workState");
+    const pauseBtn = document.getElementById("pauseWorkBtn");
+    const endBtn = document.getElementById("endWorkBtn");
+
+    if (!appSession) return;
+
+    if (appSession.workEnded) {
+        stateEl.innerText = "작업 종료";
+        stateEl.className = "work-state";
+        pauseBtn.classList.add("hidden");
+        endBtn.disabled = true;
+        stopWorkTicker();
+        updateWorkTimeDisplay();
+        return;
+    }
+
+    endBtn.disabled = false;
+    pauseBtn.classList.remove("hidden");
+
+    if (appSession.workPaused) {
+        stateEl.innerText = "일시 중지";
+        stateEl.className = "work-state orange";
+        pauseBtn.innerText = "작업 재개";
+        pauseBtn.className = "resume-btn";
+        stopWorkTicker();
+        updateWorkTimeDisplay();
+        return;
+    }
+
+    stateEl.innerText = "작업 중";
+    stateEl.className = "work-state green";
+    pauseBtn.innerText = "작업 중지";
+    pauseBtn.className = "pause-btn";
+    startWorkTicker();
+}
+
+
+function toggleWorkPause() {
+    if (!appSession || appSession.workEnded) return;
+
+    if (appSession.workPaused) {
+        appSession.workPaused = false;
+        appSession.workStartedAt = Date.now();
+    } else {
+        appSession.workElapsedMs = getWorkElapsed();
+        appSession.workStartedAt = null;
+        appSession.workPaused = true;
+    }
+
+    saveSession();
+    renderWorkState();
+}
+
+
+function endWork() {
+    if (!appSession || appSession.workEnded) return;
+
+    appSession.workElapsedMs = getWorkElapsed();
+    appSession.workStartedAt = null;
+    appSession.workPaused = false;
+    appSession.workEnded = true;
+    saveSession();
+    renderWorkState();
+}
+
+
+function showCameraPlaceholder(title, message) {
+    const placeholder = document.getElementById("cameraPlaceholder");
+    placeholder.classList.remove("hidden");
+    placeholder.innerHTML =
+        "<h2>" + title + "</h2>" +
+        (message ? "<p>" + message + "</p>" : "");
+}
+
+
+function setCameraFeedActive(active) {
+    const feed = document.getElementById("cameraFeed");
+    const placeholder = document.getElementById("cameraPlaceholder");
+
+    if (active) {
+        feed.onerror = function () {
+            detecting = false;
+            stopStatusPolling();
+            setCameraFeedActive(false);
+            showCameraPlaceholder(
+                "영상 연결 실패",
+                "python app.py 로 Flask 서버를 실행한 뒤 다시 시도하세요."
+            );
+            document.getElementById("aiStatus").innerText = "연결 실패";
+            document.getElementById("aiStatus").className = "status-value red";
+            updateDetectButtons(false);
+        };
+        feed.classList.add("active");
+        feed.src = API_BASE + "/video_feed?t=" + Date.now();
+        placeholder.classList.add("hidden");
+        document.getElementById("liveBadge").classList.remove("hidden");
+    } else {
+        feed.onerror = null;
+        feed.classList.remove("active");
+        feed.removeAttribute("src");
+        document.getElementById("liveBadge").classList.add("hidden");
+        showCameraPlaceholder("대기중", "감지 시작을 누르면 카메라가 연결됩니다.");
+    }
+}
+
+
+function startStatusPolling() {
+    stopStatusPolling();
+    pollDetectionStatus();
+    statusPollTimer = setInterval(pollDetectionStatus, 700);
+}
+
+
+function stopStatusPolling() {
+    if (statusPollTimer) {
+        clearInterval(statusPollTimer);
+        statusPollTimer = null;
+    }
+}
+
+
+async function pollDetectionStatus() {
+    try {
+        const response = await fetch(API_BASE + "/api/status");
+        if (!response.ok) return;
+        const data = await response.json();
+        updateStatus(data);
+        if (typeof data.servo_angle === "number" && !servoDragging) {
+            setServoAngle(data.servo_angle, false);
+        }
+        if (Array.isArray(data.logs)) {
+            renderDetectionLogs(data.logs);
+        }
+    } catch (error) {
+        // 서버가 아직 안 떠 있으면 무시
+    }
+}
+
+
+function renderDetectionLogs(logs) {
+    const tbody = document.getElementById("logTable");
+    if (!tbody) return;
+
+    if (!logs.length) {
+        tbody.innerHTML =
+            "<tr><td>-</td><td>감지 기록 없음</td><td>-</td><td>-</td><td>-</td></tr>";
+        return;
+    }
+
+    tbody.innerHTML = logs.map(function (row) {
+        const badgeClass = row.helmet === "미착용"
+            ? "badge-danger"
+            : (row.helmet === "착용" ? "badge-safe" : "badge-warn");
+        return (
+            "<tr>" +
+            "<td>" + (row.time || "-") + "</td>" +
+            "<td>" + (row.target || "-") + "</td>" +
+            "<td><span class=\"" + badgeClass + "\">" + (row.helmet || "-") + "</span></td>" +
+            "<td>" + (row.air || "-") + "</td>" +
+            "<td>" + (row.confidence || "-") + "</td>" +
+            "</tr>"
+        );
+    }).join("");
+}
+
+
+/* 감지 시작 */
+
+async function startDetection() {
+    if (startInFlight || detecting) return;
+
+    if (airBlocked) {
+        document.getElementById("airBlockHint").classList.add("show");
+        return;
+    }
+
+    startInFlight = true;
+    showCameraPlaceholder("카메라 연결 중", "웹캠과 YOLO 모델을 준비하고 있습니다.");
+    document.getElementById("aiStatus").innerText = "연결 중";
+    document.getElementById("aiStatus").className = "status-value orange";
+    document.getElementById("startBtn").disabled = true;
+
+    try {
+        const response = await fetch(API_BASE + "/api/start", { method: "POST" });
+        const data = await response.json().catch(function () { return {}; });
+
+        if (!response.ok || !data.ok) {
+            throw new Error(data.message || "카메라 연결에 실패했습니다. python app.py 를 실행했는지 확인하세요.");
+        }
+
+        detecting = true;
+        document.getElementById("aiStatus").innerText = "감지 중";
+        document.getElementById("aiStatus").className = "status-value green";
+        setCameraFeedActive(true);
+        updateDetectButtons(true);
+        startStatusPolling();
+    } catch (error) {
+        detecting = false;
+        setCameraFeedActive(false);
+        showCameraPlaceholder(
+            "연결 실패",
+            error.message || "Python 서버(app.py)를 실행한 뒤 다시 시도하세요."
+        );
+        document.getElementById("aiStatus").innerText = "연결 실패";
+        document.getElementById("aiStatus").className = "status-value red";
+        updateDetectButtons(false);
+    } finally {
+        startInFlight = false;
+        document.getElementById("startBtn").disabled = airBlocked;
+    }
+}
+
+
+/* 감지 중지 */
+
+async function stopDetection() {
+    detecting = false;
+    stopStatusPolling();
+    setCameraFeedActive(false);
+    updateDetectButtons(false);
+
+    document.getElementById("aiStatus").innerText = "중지됨";
+    document.getElementById("aiStatus").className = "status-value";
+    document.getElementById("noHelmetCount").innerText = "0명";
+
+    try {
+        await fetch(API_BASE + "/api/stop", { method: "POST" });
+    } catch (error) {
+        // 서버 미실행 시에도 UI는 중지 상태로 유지
+    }
+}
+
+
+function updateDetectButtons(running) {
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    if (!startBtn || !stopBtn) return;
+
+    startBtn.classList.toggle("inactive", !running);
+    stopBtn.classList.toggle("active", !running);
+}
+
+
+/* 나중에 Python에서 받을 데이터 테스트용 */
+
+function formatCurrentTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    return hours + ":" + minutes + ":" + seconds;
+}
+
+
+function updateCurrentTime() {
+    const timeEl = document.getElementById("currentTime");
+    if (timeEl) {
+        timeEl.innerText = formatCurrentTime();
+    }
+}
+
+
+function getAirLevel(ppm) {
+    if (ppm >= AIR_QUALITY_LIMIT) {
+        return "danger";
+    }
+    if (ppm >= AIR_QUALITY_WARN) {
+        return "warn";
+    }
+    return "safe";
+}
+
+
+function applyAirQuality(ppm) {
+    airPpm = Number(ppm);
+    if (Number.isNaN(airPpm)) {
+        airPpm = 0;
+    }
+
+    airBlocked = airPpm >= AIR_QUALITY_LIMIT;
+
+    const level = getAirLevel(airPpm);
+    const statusText = level === "danger" ? "작업 불가" : (level === "warn" ? "주의" : "양호");
+    const statusClass = level === "danger" ? "red" : (level === "warn" ? "orange" : "green");
+
+    document.getElementById("airStatus").innerText = statusText;
+    document.getElementById("airStatus").className = "status-value " + statusClass;
+    document.getElementById("airInfoStatus").innerText = statusText;
+    document.getElementById("airInfoStatus").className = "info-value " + statusClass;
+    document.getElementById("airPpm").innerText = airPpm;
+    document.getElementById("airLimit").innerText = AIR_QUALITY_LIMIT;
+
+    document.getElementById("airAlert").classList.toggle("show", airBlocked);
+    document.getElementById("airBlockHint").classList.toggle("show", airBlocked);
+    document.getElementById("startBtn").disabled = airBlocked;
+
+    const cameraStatus = document.getElementById("aiStatus");
+
+    if (airBlocked && detecting) {
+        stopDetection();
+        cameraStatus.innerText = "작업 불가";
+        cameraStatus.className = "status-value red";
+    } else if (!airBlocked && cameraStatus.innerText === "작업 불가") {
+        cameraStatus.innerText = detecting ? "감지 중" : "정상 작동";
+        cameraStatus.className = "status-value green";
+    }
+}
+
+
+function updateStatus(data) {
+
+    const detectCount = data.detect_count ?? data.person_count ?? 0;
+
+    document.getElementById("detectCount").innerText =
+        detectCount + "회";
+
+    document.getElementById("noHelmetCount").innerText =
+        data.no_helmet_count + "명";
+
+    applyAirQuality(data.air_quality_ppm ?? airPpm);
+
+
+    if (airBlocked) {
+
+        document.getElementById("detectStatus").innerText =
+            "작업 불가";
+
+        document.getElementById("detectStatus").className =
+            "info-value red";
+
+    } else if (data.no_helmet_count > 0) {
+
+        document.getElementById("detectStatus").innerText =
+            "위험";
+
+        document.getElementById("detectStatus").className =
+            "info-value red";
+
+    } else {
+
+        document.getElementById("detectStatus").innerText =
+            "안전";
+
+        document.getElementById("detectStatus").className =
+            "info-value green";
+
+    }
+
+}
+
+
+/* 화면 테스트 */
+
+updateStatus({
+
+    detect_count: 0,
+
+    no_helmet_count: 0,
+
+    air_quality_ppm: 350
+
+});
+
+function isAdminUser() {
+    try {
+        const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "{}");
+        return session.role === "admin";
+    } catch (error) {
+        return false;
+    }
+}
+
+
+function setServoAngle(angle, sendToDevice) {
+    servoAngle = Math.min(180, Math.max(0, Math.round(angle)));
+    document.getElementById("servoProgress").style.width = (servoAngle / 180) * 100 + "%";
+    document.getElementById("servoAngleLabel").innerText = servoAngle + "°";
+
+    if (sendToDevice === false) {
+        return;
+    }
+
+    if (servoSendTimer) {
+        clearTimeout(servoSendTimer);
+    }
+    // debounce a bit longer so Arduino is not flooded
+    servoSendTimer = setTimeout(function () {
+        fetch(API_BASE + "/api/servo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ angle: servoAngle })
+        }).catch(function () {});
+    }, servoDragging ? 120 : 0);
+}
+
+
+function servoAngleFromEvent(event) {
+    const bar = document.getElementById("servoBar");
+    const rect = bar.getBoundingClientRect();
+    const ratio = (event.clientX - rect.left) / rect.width;
+    setServoAngle(ratio * 180, true);
+}
+
+
+function onServoPointerDown(event) {
+    if (!isAdminUser()) return;
+    servoDragging = true;
+    event.preventDefault();
+    servoAngleFromEvent(event);
+}
+
+
+function onServoPointerMove(event) {
+    if (!servoDragging) return;
+    servoAngleFromEvent(event);
+}
+
+
+function onServoPointerUp() {
+    if (servoDragging) {
+        servoDragging = false;
+        setServoAngle(servoAngle, true);
+    }
+}
+
+
+const servoBar = document.getElementById("servoBar");
+servoBar.addEventListener("pointerdown", onServoPointerDown);
+window.addEventListener("pointermove", onServoPointerMove);
+window.addEventListener("pointerup", onServoPointerUp);
+setServoAngle(90);
+
+updateCurrentTime();
+setInterval(updateCurrentTime, 1000);
+
+restoreSession();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+
+# YOLO / training artifacts
+dataset/
+labels_backup/
+runs/
+*.pt
+!models/best.pt
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local caches
+ultralytics/
+wandb/
